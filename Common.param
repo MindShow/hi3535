@@ -16,7 +16,6 @@ CFLAGS += -I../app
 CFLAGS += -I../dec
 CFLAGS += -I../HiSDK/common
 CFLAGS += -I../HiApp
-CFLAGS += -I../queue
 CFLAGS += -I../include
 CFLAGS += -I../public
 CFLAGS += -I../shm
