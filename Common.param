@@ -1,0 +1,23 @@
+include ../Makefile.param
+
+INC_FLAGS := -I$(HI_INC)
+INC_FLAGS += -I$(HI_EXTDRV)/tlv320aic31
+
+CFLAGS := -Wall -O2 -fPIC 
+CFLAGS += $(INC_FLAGS) 
+
+#找出当前目录下所有的.c和.cpp文件
+CSOURCE :=$(shell find . -type f -name "*.c")
+
+#生成.c和.cpp文件对应的.o文件
+COBJS :=$(subst .c,.o,$(CSOURCE))
+
+CFLAGS += -I../app 
+CFLAGS += -I../dec
+CFLAGS += -I../HiSDK/common
+CFLAGS += -I../HiApp
+CFLAGS += -I../queue
+CFLAGS += -I../include
+CFLAGS += -I../public
+CFLAGS += -I../shm
+CFLAGS += -I../alarm

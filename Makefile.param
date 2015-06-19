@@ -1,0 +1,91 @@
+# Makefile.param 
+# Only global variable should be defined here.
+# All the variables must be used as "export" and "?=".
+# Otherwise, there will be some errors, when Makefile.param is nested.
+
+# Use this file as the following sample
+# ifeq ($(PARAM_FILE), )
+#     PARAM_FILE:=../Makefile.param
+#     include $(PARAM_FILE)
+# endif
+
+
+# One ARCH may have a variety of CHIPs
+
+export HIARCH?=hi3535
+export HI_CROSS?=glibc#uclibc
+
+ifeq ($(HIARCH),hi3535)
+export HICHIP?=0x35350100
+endif
+
+
+ifeq ($(HIARCH),hi3535)
+export CHIP_TYPE=CHIP_TYPE_hi3535v100
+endif
+
+ifeq ($(HIARCH),hi3535)
+export HICHIP?=0x35350100
+endif
+
+# One CHIP may have a variety of customer's version. '.C01' or '.C02' and so on.
+ifeq ($(HI_CROSS),glibc)
+export CVER?= .C02
+endif
+
+ifeq ($(HIARCH),hi3535)
+export SPVER?=SPC070
+endif
+
+ifeq ($(HIARCH),hi3535)
+export SDK_PATH?=$(PWD)/HiSDK
+export  CPU_TYPE=HI3535
+export  CPU=HI3535
+endif
+ifeq ($(HI_CROSS),glibc)
+export ARCH?=arm
+export CROSS_COMPILE?= arm-hisiv200-linux-
+export CROSS?= arm-hisiv200-linux-
+else
+export ARCH?=arm
+export CROSS_COMPILE?= arm-hisiv100nptl-linux-
+export CROSS?= arm-hisiv100nptl-linux-
+endif
+ifeq ($(CROSS), )
+    $(error CROSS not defined! Please check LINUX_ROOT=$(LINUX_ROOT) )
+endif
+
+ifeq ($(HI_CROSS),glibc)
+export ARCH?=arm
+export CROSS_COMPILE?= arm-hisiv200-linux-
+export CROSS?= arm-hisiv200-linux-
+else
+export ARCH?=arm
+export CROSS_COMPILE?= arm-hisiv100nptl-linux-
+export CROSS?= arm-hisiv100nptl-linux-
+endif
+ifeq ($(CROSS), )
+    $(error CROSS not defined! Please check LINUX_ROOT=$(LINUX_ROOT) )
+endif
+
+#编译选项
+export CC:=$(CROSS)gcc
+export CPP:=$(CROSS)g++
+export AR:=$(CROSS)ar
+
+#海思SDK头文件
+export HI_INC = $(SDK_PATH)/include
+export HI_LIB = $(SDK_PATH)/lib
+export HI_EXTDRV = $(SDK_PATH)/extdrv
+
+# 海思的静态库(.a)
+export VDEC_LIBA  := $(HI_LIB)/libmpi.a\
+					 $(HI_LIB)/libhdmi.a
+export AUDIO_LIBA := $(HI_LIB)/libVoiceEngine.a \
+        			 $(HI_LIB)/libaec.a \
+        			 $(HI_LIB)/libresampler.a \
+        		     $(HI_LIB)/libanr.a
+export JPEGD_LIBA := $(HI_LIB)/libjpeg.a
+
+#共享内存的静态库
+export SHM_LIBA :=$(PWD)/shm/libshmfb.a
