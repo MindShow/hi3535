@@ -4,8 +4,8 @@ all: $(LIB_NAME).so
 #生成动态库
 $(LIB_NAME).so:$(COBJS) $(HI_LIB)/*.a 
 	$(CC) -shared -o $(LIB_NAME).so $(COBJS) $(HI_LIB)/*.a 
-	@cp -rf $(LIB_NAME).so ../lib/
-	@cp -rf $(LIB_NAME).so /mnt/nfs/hi3535/lib/
+	@mv $(LIB_NAME).so ../lib/
+	@cp -rf ../lib/*.so /mnt/nfs/hi3535/lib/
 
 #清除
 clean:

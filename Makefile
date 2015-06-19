@@ -13,7 +13,7 @@ SUBDIRS += alarm
 #当前目录，再切换到demo目录中执行其中的makefile。
 all: $(SUBDIRS)
 	@make -C main 
-	@cp main/hi3535 /mnt/nfs/hi3535
+	@mv main/hi3535 /mnt/nfs/hi3535
 # > /dev/NULL:表示不输出编译的打印过程(未验证)
 $(SUBDIRS):  
 	@make -C $@ > /dev/NULL
