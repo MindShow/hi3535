@@ -1508,7 +1508,7 @@ HI_U8Q4F4	HiSDK/include/hi_type.h	/^typedef unsigned short          HI_U8Q4F4;$/
 HI_U8Q8	HiSDK/include/hi_type.h	/^typedef unsigned short          HI_U8Q8;$/;"	t
 HI_U8	HiSDK/include/hi_type.h	/^typedef unsigned char           HI_U8;$/;"	t
 HI_VOID	HiSDK/include/hi_type.h	98;"	d
-HI_WD_DEVICE	app/watchdogLib.c	17;"	d	file:
+HI_WD_DEVICE	app/watchdogLib.c	18;"	d	file:
 HPLCOM_OUTPUT_LEVEL_CTRL	HiSDK/extdrv/tlv320aic31/tlv320aic31.h	24;"	d
 HPLOUT_OUTPUT_LEVEL_CTRL	HiSDK/extdrv/tlv320aic31/tlv320aic31.h	19;"	d
 HPL	HiSDK/extdrv/tlv320aic31/tlv320aic31.h	/^    HPL,$/;"	e	enum:Audio_Out_
