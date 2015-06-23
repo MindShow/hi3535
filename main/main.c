@@ -1,9 +1,10 @@
 #include "main.h"
 int main(int argc, char *argv[])
 {
-	HisiDecodeInit();
-    HisiFramBuffer();
-    CreatThread_GetShrMemPara();// 创建线程，轮询共享内存,从中获取配置参数。
+    startWtdThread();// 开启看门狗
+	// HisiDecodeInit();
+    // HisiFramBuffer();
+    // CreatThread_GetShrMemPara();// 创建线程，轮询共享内存,从中获取配置参数。
     // HisiMotionDetect();
     while(1)
     {

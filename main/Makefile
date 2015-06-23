@@ -39,5 +39,6 @@ HI_MPI_LIBS += $(SHM_LIBA)
 #-lrt -lstdc++的作用是让gcc也能编译c++的程序
 all:
 	$(CC) -lrt -lstdc++ $(CFLAGS) -o $(TARGET) main.c $(INC_FLAGS) $(INCLUDE_PATH) $(LIB_PATH) $(LIB_FILE) $(HI_MPI_LIBS) 
+	$(CC) $(CFLAGS) -o myWatchDog myWatchDog.c ../app/watchdogLib.c	$(INC_FLAGS) $(INCLUDE_PATH) $(LIB_PATH) -lpthread
 clean:
 	rm  -rf  $(TARGET) *.o

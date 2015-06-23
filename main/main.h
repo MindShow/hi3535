@@ -12,6 +12,7 @@ extern "C" {
 #include "ShareMem.h"
 #include "HiShm.h"
 #include "MotionDetect.h"
+#include "watchdogLib.h"
 
 #ifdef __cplusplus
 }
