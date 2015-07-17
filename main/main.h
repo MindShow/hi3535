@@ -8,11 +8,12 @@ extern "C" {
 #include <unistd.h>
 #include "app.h"
 #include "dec.h"
-#include "HiApp.h"
+#include "HiFrameBuf.h"
 #include "ShareMem.h"
 #include "HiShm.h"
-#include "MotionDetect.h"
+#include "HiMotionDetect.h"
 #include "watchdog.h"
+#include "database.h"
 
 #ifdef __cplusplus
 }

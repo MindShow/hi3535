@@ -14,8 +14,9 @@ extern "C" {
 #include "hi_comm_video.h"
 #include "common.h"
 #include "global.h"
+#include "public.h"
 #include "HiMppDec.h"
-#include "HiDecUsrPic.h"
+#include "HiUsrPic.h"
 #include "CfgFileOpera.h"
 #include "HiDecList.h"
 
@@ -36,11 +37,14 @@ typedef struct decode_dev_channel_info_t
 }decode_dev_channel_info_t;
 
 //func
-int Hi_DecStart(int NewDispMode);
+int Hi_DecStart(int DispMode, int PlayMode);
 int HisiDecodeInit(void);
 void DecListOpera_AddChn(int Chn, int nWidth, int nHeight);
+void DecListOpera_RecoverAllChn(void);
 void DecListOpera_DelChn(int Chn);
+void DecListOpera_DelAllChn(void);
 void DecListOpera_GetResolution(int Chn, int *nWidth, int *nHeight);
+void DecListOpera_GetChnInfo(void);
 
 #ifdef __cplusplus
 }

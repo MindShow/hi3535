@@ -50,8 +50,17 @@ HI_BOOL g_ModCommVB = HI_TRUE;
 HI_VOID	SAMPLE_COMM_VDEC_Sysconf(VB_CONF_S *pstVbConf, SIZE_S *pstSize)
 {
 	memset(pstVbConf, 0, sizeof(VB_CONF_S));	  
+#if 0
+    HI_U32 u32BlkSize;
+    u32BlkSize = SAMPLE_COMM_SYS_CalcPicVbBlkSize(VIDEO_ENCODING_MODE_PAL, PIC_D1, SAMPLE_PIXEL_FORMAT, SAMPLE_SYS_ALIGN_WIDTH);
+    pstVbConf->u32MaxPoolCnt = 32;
+    pstVbConf->astCommPool[0].u32BlkSize = u32BlkSize; 
+    pstVbConf->astCommPool[0].u32BlkCnt  = 50;    
+    pstVbConf->astCommPool[1].u32BlkSize = (1920 * 1080 * 3) >> 1;
+    pstVbConf->astCommPool[1].u32BlkCnt  = 10;    
+#endif
     pstVbConf->u32MaxPoolCnt = 2;
-    pstVbConf->astCommPool[0].u32BlkSize = (1920 * 1080 * 3) >> 1;
+    pstVbConf->astCommPool[0].u32BlkSize = (1920 * 1080 * 3) >> 1; 
     pstVbConf->astCommPool[0].u32BlkCnt  = 5;    
 }
 

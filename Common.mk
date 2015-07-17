@@ -6,6 +6,7 @@ $(LIB_NAME).so:$(COBJS) $(HI_LIB)/*.a
 	$(CC) -shared -o $(LIB_NAME).so $(COBJS) $(HI_LIB)/*.a 
 	@mv $(LIB_NAME).so ../lib/
 	@cp -rf ../lib/*.so /mnt/nfs/hi3535/lib/
+	@rm $(COBJS)
 
 #清除
 clean:

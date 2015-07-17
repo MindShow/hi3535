@@ -89,3 +89,6 @@ export JPEGD_LIBA := $(HI_LIB)/libjpeg.a
 
 #共享内存的静态库
 export SHM_LIBA :=$(PWD)/shm/libshmfb.a
+#sqlite3数据库的动态库
+export SQLITE3_LIBA :=$(PWD)/lib/libsqlite3.so.0 \
+					  $(PWD)/lib/libsqlite3.so.0.8.6

@@ -27,6 +27,8 @@ extern "C"{
 #include <signal.h>
 
 #include "sample_comm.h"
+#include "global.h"
+
 
 /******************************************************************************
 * function : Set vpss system memory location
@@ -67,7 +69,7 @@ HI_S32 SAMPLE_COMM_VPSS_MemConfig()
 /*****************************************************************************
 * function : start vpss. VPSS chn with frame
 *****************************************************************************/
-HI_S32 SAMPLE_COMM_VPSS_Start(HI_S32 s32GrpCnt, SIZE_S *pstSize, HI_S32 s32VpssChnCnt,VPSS_GRP_ATTR_S *pstVpssGrpAttr)
+HI_S32 SAMPLE_COMM_VPSS_Start(HI_S32 s32GrpCnt, SIZE_S *pstSize, HI_S32 s32ChnCnt,VPSS_GRP_ATTR_S *pstVpssGrpAttr)
 {
     VPSS_GRP VpssGrp;
     VPSS_CHN VpssChn;
@@ -76,10 +78,9 @@ HI_S32 SAMPLE_COMM_VPSS_Start(HI_S32 s32GrpCnt, SIZE_S *pstSize, HI_S32 s32VpssC
     VPSS_GRP_PARAM_S stVpssParam = {0};
     VPSS_CHN_MODE_S stVpssChnMode;
     HI_S32 s32Ret;
-    HI_S32 j;
+    HI_S32 i, j;
 
     /*** Set Vpss Grp Attr ***/
-
     if(NULL == pstVpssGrpAttr)
     {
         stGrpAttr.u32MaxW = pstSize->u32Width;
@@ -94,88 +95,102 @@ HI_S32 SAMPLE_COMM_VPSS_Start(HI_S32 s32GrpCnt, SIZE_S *pstSize, HI_S32 s32VpssC
     {
         memcpy(&stGrpAttr,pstVpssGrpAttr,sizeof(VPSS_GRP_ATTR_S));
     }
-    VpssGrp = s32GrpCnt;
-    /*** create vpss group ***/
-    s32Ret = HI_MPI_VPSS_CreateGrp(VpssGrp, &stGrpAttr);
-    if (s32Ret != HI_SUCCESS)
-    {
-        SAMPLE_PRT("HI_MPI_VPSS_CreateGrp failed with %#x!\n", s32Ret);
-        return HI_FAILURE;
-    }
+    
 
-    /*** set vpss param ***/
-    s32Ret = HI_MPI_VPSS_GetGrpParam(VpssGrp, &stVpssParam);
-    if (s32Ret != HI_SUCCESS)
+    for(i=0; i<s32GrpCnt; i++)
     {
-        SAMPLE_PRT("failed with %#x!\n", s32Ret);
-        return HI_FAILURE;
-    }
-    /*设置VPSS高级属性*/
-    stVpssParam.u32IeStrength = 0;
-    s32Ret = HI_MPI_VPSS_SetGrpParam(VpssGrp, &stVpssParam);
-    if (s32Ret != HI_SUCCESS)
-    {
-        SAMPLE_PRT("failed with %#x!\n", s32Ret);
-        return HI_FAILURE;
-    }
-
-    /*** enable vpss chn, with frame ***/
-    for(j=0; j<s32VpssChnCnt ; j++)
-    {
-        VpssChn = j;
-
-        #if 1 
-        // 配置Vpss模式
-        if(VpssChn == 1) // 通道1设置成user模式
+        VpssGrp = i;
+        /*** create vpss group ***/
+        s32Ret = HI_MPI_VPSS_CreateGrp(VpssGrp, &stGrpAttr);
+        if (s32Ret != HI_SUCCESS)
         {
-            printf("VpssGrp:%d, VpssChn:%d\n",VpssGrp, VpssChn);
-            stVpssChnMode.bDouble 	     = HI_FALSE;
-            stVpssChnMode.enChnMode 	 = VPSS_CHN_MODE_USER;
-            stVpssChnMode.enPixelFormat  = PIXEL_FORMAT_YUV_SEMIPLANAR_420;
-            stVpssChnMode.u32Width 	     = 352;
-            stVpssChnMode.u32Height 	 = 288;
-            stVpssChnMode.enCompressMode = COMPRESS_MODE_NONE;
+            SAMPLE_PRT("HI_MPI_VPSS_CreateGrp failed with %#x!\n", s32Ret);
+            return HI_FAILURE;
+        }
 
-            s32Ret = HI_MPI_VPSS_SetChnMode(VpssGrp, VpssChn, &stVpssChnMode);
-            if (HI_SUCCESS != s32Ret)
+        /*** set vpss param ***/
+        s32Ret = HI_MPI_VPSS_GetGrpParam(VpssGrp, &stVpssParam);
+        if (s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_PRT("failed with %#x!\n", s32Ret);
+            return HI_FAILURE;
+        }
+        
+        stVpssParam.u32IeStrength = 0;
+        s32Ret = HI_MPI_VPSS_SetGrpParam(VpssGrp, &stVpssParam);
+        if (s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_PRT("failed with %#x!\n", s32Ret);
+            return HI_FAILURE;
+        }
+		
+        /*** enable vpss chn, with frame ***/
+        for(j=0; j<s32ChnCnt; j++)
+        {
+            VpssChn = j;
+            /* Set Vpss Chn attr */
+            stChnAttr.bSpEn = HI_FALSE;
+            stChnAttr.bBorderEn = HI_TRUE;
+            stChnAttr.stBorder.u32Color = 0xffffff;
+            stChnAttr.stBorder.u32LeftWidth = 0;
+            stChnAttr.stBorder.u32RightWidth = 0;
+            stChnAttr.stBorder.u32TopWidth = 0;
+            stChnAttr.stBorder.u32BottomWidth = 0;
+			if(getActionAlarmStatus(i)==1)
+			{
+				#ifdef HI3535
+				stVpssChnMode.bDouble 	     = HI_FALSE;
+				stVpssChnMode.enChnMode 	 = VPSS_CHN_MODE_USER;
+				stVpssChnMode.enPixelFormat  = PIXEL_FORMAT_YUV_SEMIPLANAR_420;
+				stVpssChnMode.u32Width 	     = 352;
+				stVpssChnMode.u32Height 	 = 288;
+		       	stVpssChnMode.enCompressMode = COMPRESS_MODE_NONE;
+				
+				if(j==2 || j==1)
+		        {
+			        s32Ret = HI_MPI_VPSS_SetChnMode(i, VpssChn, &stVpssChnMode);
+			        if (HI_SUCCESS != s32Ret)
+			        {
+			            printf("set vpss grp%d chn%d mode fail, s32Ret: 0x%x.\n", i, VpssChn, s32Ret);
+			            return s32Ret;
+			        }
+		        }
+				#endif
+				
+			}
+			
+       		int  u32Depth = 6;
+	        s32Ret = HI_MPI_VPSS_SetDepth(i, VpssChn, u32Depth);
+	        if (HI_SUCCESS != s32Ret)
+	        {
+	            printf("HI_MPI_VPSS_SetDepth fail! Grp: %d, Chn: %d! s32Ret: 0x%x.\n", i, VpssChn, s32Ret);
+	            return s32Ret;
+	        }
+            
+            s32Ret = HI_MPI_VPSS_SetChnAttr(VpssGrp, VpssChn, &stChnAttr);
+            if (s32Ret != HI_SUCCESS)
             {
-                printf("set vpss grp%d chn%d mode fail, s32Ret: 0x%x.\n", VpssGrp, VpssChn, s32Ret);
-                return s32Ret;
+                SAMPLE_PRT("HI_MPI_VPSS_SetChnAttr failed with %#x\n", s32Ret);
+                return HI_FAILURE;
+            }
+    
+            s32Ret = HI_MPI_VPSS_EnableChn(VpssGrp, VpssChn);
+            if (s32Ret != HI_SUCCESS)
+            {
+                SAMPLE_PRT("HI_MPI_VPSS_EnableChn failed with %#x\n", s32Ret);
+                return HI_FAILURE;
             }
         }
-        #endif
-
-        /* Set Vpss Chn attr */
-        stChnAttr.bSpEn = HI_FALSE;
-        stChnAttr.bBorderEn = HI_FALSE;
-        stChnAttr.stBorder.u32Color = 0xff00;
-        stChnAttr.stBorder.u32LeftWidth = 2;
-        stChnAttr.stBorder.u32RightWidth = 2;
-        stChnAttr.stBorder.u32TopWidth = 2;
-        stChnAttr.stBorder.u32BottomWidth = 2;
-        
-        /*设置VPSS 通道属性*/
-        s32Ret = HI_MPI_VPSS_SetChnAttr(VpssGrp, VpssChn, &stChnAttr);
+		
+	
+        /*** start vpss group ***/
+        s32Ret = HI_MPI_VPSS_StartGrp(VpssGrp);
         if (s32Ret != HI_SUCCESS)
         {
-            SAMPLE_PRT("HI_MPI_VPSS_SetChnAttr failed with %#x\n", s32Ret);
+            SAMPLE_PRT("HI_MPI_VPSS_StartGrp failed with %#x\n", s32Ret);
             return HI_FAILURE;
         }
 
-        s32Ret = HI_MPI_VPSS_EnableChn(VpssGrp, VpssChn);
-        if (s32Ret != HI_SUCCESS)
-        {
-            SAMPLE_PRT("HI_MPI_VPSS_EnableChn failed with %#x\n", s32Ret);
-            return HI_FAILURE;
-        }
-          
-    }
-    /*** start vpss group ***/
-    s32Ret = HI_MPI_VPSS_StartGrp(VpssGrp);
-    if (s32Ret != HI_SUCCESS)
-    {
-        SAMPLE_PRT("HI_MPI_VPSS_StartGrp failed with %#x\n", s32Ret);
-        return HI_FAILURE;
     }
     return HI_SUCCESS;
 }
@@ -185,22 +200,37 @@ HI_S32 SAMPLE_COMM_VPSS_Start(HI_S32 s32GrpCnt, SIZE_S *pstSize, HI_S32 s32VpssC
 *****************************************************************************/
 HI_S32 SAMPLE_COMM_VPSS_Stop(HI_S32 s32GrpCnt, HI_S32 s32ChnCnt)
 {
+    HI_S32 i, j;
     HI_S32 s32Ret = HI_SUCCESS;
     VPSS_GRP VpssGrp;
+    VPSS_CHN VpssChn;
 
-    VpssGrp = s32GrpCnt;
-    s32Ret = HI_MPI_VPSS_StopGrp(VpssGrp);
-    if (s32Ret != HI_SUCCESS)
+    for(i=0; i<s32GrpCnt; i++)
     {
-        SAMPLE_PRT("failed with %#x!\n", s32Ret);
-        return HI_FAILURE;
-    }
-
-    s32Ret = HI_MPI_VPSS_DestroyGrp(VpssGrp);
-    if (s32Ret != HI_SUCCESS)
-    {
-        SAMPLE_PRT("failed with %#x!\n", s32Ret);
-        return HI_FAILURE;
+        VpssGrp = i;
+        s32Ret = HI_MPI_VPSS_StopGrp(VpssGrp);
+        if (s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_PRT("failed with %#x!\n", s32Ret);
+            return HI_FAILURE;
+        }
+        for(j=0; j<s32ChnCnt; j++)
+        {
+            VpssChn = j;
+            s32Ret = HI_MPI_VPSS_DisableChn(VpssGrp, VpssChn);
+            if (s32Ret != HI_SUCCESS)
+            {
+                SAMPLE_PRT("failed with %#x!\n", s32Ret);
+                return HI_FAILURE;
+            }
+        }
+    
+        s32Ret = HI_MPI_VPSS_DestroyGrp(VpssGrp);
+        if (s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_PRT("failed with %#x!\n", s32Ret);
+            return HI_FAILURE;
+        }
     }
 
     return HI_SUCCESS;

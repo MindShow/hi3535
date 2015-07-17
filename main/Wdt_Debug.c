@@ -2,10 +2,43 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include "../include/Linux_Watchdog.h" 
+#define  HI_WD_DEVICE   "/dev/watchdog"
 
-#include "watchdog.h"
+/**/
+int openWtdog(int *fd)
+{
+    printf("Watchdog Start!\n");
+	*fd=open(HI_WD_DEVICE,O_RDWR|O_SYNC);
+	if(*fd<=0)
+	{
+		printf("open wtdog fail \n");
+		return -1;
+	}
+    return 0;
+}
 
-
+/**/
+int closeWtdog(int fd)
+{
+	if(fd>0)
+	{
+		close(fd);
+	}
+	return 0;
+}
+/**/
+int feedDog(int fd)
+{
+	if(ioctl(fd,WDIOC_KEEPALIVE, NULL) == -1)
+	{
+		printf("Failed to ioctrl\n");
+		return -1;
+	}
+    return 0;
+}
 int main()
 {
 	int ret=0;

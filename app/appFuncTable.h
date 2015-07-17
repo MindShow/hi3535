@@ -6,6 +6,7 @@ extern "C" {
 #endif 
 #include <stdio.h>
 #include "dec.h"
+#include "HiMotionDetect.h"
 #include "NVR_Stream.h"
 #include "NvrCmdCode.h"
 typedef int (*AppFunc)(void *pRecvData, int Len);

@@ -21,7 +21,6 @@ extern "C" {
 
 // 解码通道的消息
 typedef struct Decode_ChnInfo{
-    char Url[128];
     int ChnNo;      // 通道号 
     int WinPos;     // 屏幕显示的位置
     int nWidth;     // 图像分辨率的高度值
@@ -38,7 +37,6 @@ typedef struct decode_msg_t
 
 typedef struct decode_thread_channel_info_t
 {//解码通道的信息      
-    char Url[128];//运行状态 
     unsigned char RunStatus;//运行状态 
     unsigned char ChnNo;//设备号
     unsigned char StreamNo;//通道号
@@ -57,14 +55,11 @@ typedef struct decode_thread_channel_info_t
     struct kernel_list_head list;
 }decode_thread_channel_info_t;
 
-
-HI_VOID Hi_DecHandleSig(HI_S32 signo);
+HI_VOID Hi_HandleSig(HI_S32 signo);
 int Hi_DecMppInit(HI_VOID);
-HI_S32 HiDec_VoInit(HI_VOID);
-HI_S32 HiDec_VoStartAllChn(HI_S32 enMode);
+HI_S32 HiDec_Preview_VoStartChn(HI_S32 enMode);
+HI_S32 HiDec_Playback_VoStartChn(HI_S32 enMode);
 HI_S32 HiDec_VoStartFullSreen(HI_S32 enMode, HI_S32 s32ChnNum);
-int DecLink_Init(void);
-void *Hi_DecUsrPicThread(void *arg);
 HI_S32 HiDec_CreateSendThread(decode_thread_channel_info_t *pDecListChnInfo);
 int HiDec_ReleseDecResource(int WinPos);
 HI_S32 HiDec_Stop(HI_S32 s32ChnNum);

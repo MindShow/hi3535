@@ -19,4 +19,4 @@ CFLAGS += -I../HiApp
 CFLAGS += -I../include
 CFLAGS += -I../public
 CFLAGS += -I../shm
-CFLAGS += -I../alarm
+CFLAGS += -I../database

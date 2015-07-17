@@ -11,6 +11,7 @@ extern "C" {
 #define SHM_ID_HIFB_VIDEO	3
 #define SHM_ID_HIFB_FB	    4
 #define SHM_ID_HIFB_CMD	    4
+#define SHM_ID_AI           5
 
 int ShmRecv(int id, void *pData, int *pLen);
 void shm_initial(int ID);

@@ -1,29 +1,10 @@
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <linux/types.h>
-#include <pthread.h>
-
 #include "watchdog.h"
-#include "common.h"
-// #include "commonLib.h"
-// #include "global.h"
-// #include "param.h"
-// #include "myThreadLib.h"
-
-
-#define  HI_WD_DEVICE   "/dev/watchdog"
-
-
-// static Hi3531_wtd_info_t   watchdogInfo;
-// static int g_run = 0;
+static pthread_t pWdtId;    
 
 /**/
 int openWtdog(int *fd)
 {
+    Printf("Watchdog Start!\n");
 	*fd=open(HI_WD_DEVICE,O_RDWR|O_SYNC);
 	if(*fd<=0)
 	{
@@ -150,31 +131,7 @@ void *WatchdogThread()
 		Printf("open fial\n");
         return NULL;
 	}
-#if 0
-	ret=GetWtdogSuportOption(fd);
-	if(ret<0)
-	{
-		Printf("GetWtdogSuportOption  fail \n");
-	}
 
-	ret=GetWtdogStatus(fd);
-	if(ret<0)
-	{
-		Printf("GetWtdogStatus fail\n");
-	}
-
-	ret=GetWtdogBootstatus(fd);
-	if(ret<0)
-	{
-		Printf("GetWtdogBootstatus  fail\n");
-	}
-	t=0;
-	ret=feedDog( fd, &t);
-	if(ret<0)
-	{
-		Printf("feedDog  fail\n");
-	}
-#endif
     // 设置超时时间为20s
 	ret=setWtdogTimeout(fd, 20);
 	if(ret<0)
@@ -203,7 +160,6 @@ void *WatchdogThread()
 
 int  startWtdThread()
 {
-    pthread_t pWdtId;    
 	if(pthread_create(&pWdtId, NULL, WatchdogThread, NULL) < 0)
 	{
 		Printf("WatchdogThread error\r\n");
@@ -211,4 +167,14 @@ int  startWtdThread()
 	}
 	return 0;
 }
-
+/*
+关闭看门狗，系统在线升级时，要关闭看门狗
+*/
+void stopWtdthread(void)
+{
+    // g_run = 0;
+    if(pWdtId > 0)
+    {
+        pthread_join(pWdtId, NULL);
+    }
+}

@@ -19,7 +19,8 @@ typedef enum dec_list_opera_type
     DEC_LIST_OPERA_TYPE_PAUSE_ALL,//暂停所有
     DEC_LIST_OPERA_TYPE_RUN,      //运行
     DEC_LIST_OPERA_TYPE_RUN_ALL,  //运行所有
-    DEC_LIST_OPERA_TYPE_GET_RESOLUTION//查询获取链表的内容 
+    DEC_LIST_OPERA_TYPE_GET_RESOLUTION,//查询链表，获取分辨率
+    DEC_LIST_OPERA_TYPE_GET_CHN_INFO  //获取链表的通道信息
 }dec_list_opera_type;
     
 HI_S32 Hi_DecLinkManage(int DecLinkOperaType, Decode_ChnInfo *DecChnInfo);

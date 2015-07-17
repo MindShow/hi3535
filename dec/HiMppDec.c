@@ -32,45 +32,6 @@ HI_S32 HiDec_GetPicSize(PIC_SIZE_E Resolution, SIZE_S *stSize)
 }
 
 /*******************
- * 初始化SYS和VB
- * *****************/
-HI_S32 HiDec_InitSysAndVB(SIZE_S stSize)
-{
-    HI_S32 s32Ret;
-    VB_CONF_S stVbConf;
-	SAMPLE_COMM_VDEC_Sysconf(&stVbConf, &stSize);// 配置解码视频缓存池的属性
-	s32Ret = SAMPLE_COMM_SYS_Init(&stVbConf);
-#if 0
-	if(s32Ret != HI_SUCCESS)
-	{
-	    SAMPLE_PRT("init sys fail for %#x!\n", s32Ret);
-	    SAMPLE_COMM_SYS_Exit();	
-        return HI_FAILURE;
-	} 
-      SAMPLE_COMM_SYS_MemConfig();
-#endif
-    return HI_SUCCESS;
-}
-
-/*******************
- * 初始化mod和common VB
- * *****************/
-HI_S32 HiDec_InitCommVB(SIZE_S stSize)
-{
-    HI_S32 s32Ret;
-    VB_CONF_S stModVbConf;
-	SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize);	
-	s32Ret = SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
-	if(s32Ret != HI_SUCCESS)
-	{	    	
-	    SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
-	    SAMPLE_COMM_SYS_Exit();	
-        return HI_FAILURE;
-	}
-    return HI_SUCCESS;
-}
-
-/*******************
  * 开启Vdec
  * *****************/
 HI_S32 HiDec_VdecStart(HI_S32 s32ChnNum, SIZE_S stSize)
@@ -98,7 +59,7 @@ HI_S32 HiDec_VpssStart(HI_S32 s32ChnNum,SIZE_S stSize)
 	VPSS_GRP_ATTR_S stVpssGrpAttr[VDEC_MAX_CHN_NUM];
 	stRotateSize.u32Width = stRotateSize.u32Height = MAX2(stSize.u32Width, stSize.u32Height);
     SAMPLE_COMM_VDEC_VpssGrpAttr(s32ChnNum, &stVpssGrpAttr[0], &stRotateSize);
-	s32Ret = SAMPLE_COMM_VPSS_Start(s32ChnNum, &stRotateSize, 1, &stVpssGrpAttr[0]);
+	s32Ret = SAMPLE_COMM_VPSS_Start(s32ChnNum, &stRotateSize, VPSS_MAX_PHY_CHN_NUM, &stVpssGrpAttr[0]);
 	if(s32Ret != HI_SUCCESS)
 	{	    
 	    SAMPLE_PRT("start VPSS fail for %#x!\n", s32Ret);
@@ -108,45 +69,14 @@ HI_S32 HiDec_VpssStart(HI_S32 s32ChnNum,SIZE_S stSize)
     return HI_SUCCESS;
 }
 
-/*******************
- * 初始化Vo模块
- * *****************/
-HI_S32 HiDec_VoInit(HI_VOID)
-{
-    HI_S32 s32Ret;
-	VO_DEV VoDev = 0;
-	VO_PUB_ATTR_S stVoPubAttr;
-    HI_S32 s32ChnNum = 0;
-	VO_LAYER VoLayer = 0;
-	VO_VIDEO_LAYER_ATTR_S stVoLayerAttr;
-	SAMPLE_COMM_VDEC_VoAttr(s32ChnNum, VoDev ,&stVoPubAttr, &stVoLayerAttr);
-	s32Ret = SAMPLE_COMM_VO_StartDev(VoDev, &stVoPubAttr);
-	if(s32Ret != HI_SUCCESS)
-	{		
-		SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
-	    SAMPLE_COMM_VO_StopDev(VoDev);
-        return HI_FAILURE;
-	}
-    
-	s32Ret = SAMPLE_COMM_VO_StartLayer(VoLayer, &stVoLayerAttr);
-	if(s32Ret != HI_SUCCESS)
-	{		
-		SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
-	    SAMPLE_COMM_VO_StopLayer(VoLayer);
-        return HI_FAILURE;
-	}	
-
-    return HI_SUCCESS;
-}
-
 /**********************
- * 启动VO,启动所有的通道
+ * 启动VO,设置实时预览的分屏画面
  ********************/ 
-HI_S32 HiDec_VoStartAllChn(HI_S32 enMode)
+HI_S32 HiDec_Preview_VoStartChn(HI_S32 enMode)
 {
     HI_S32 s32Ret;
 	VO_LAYER VoLayer = 0;
-	s32Ret = SAMPLE_COMM_VO_StartChn(VoLayer, enMode);
+	s32Ret = SAMPLE_Preview_VO_StartChn(VoLayer, enMode);
 	if(s32Ret != HI_SUCCESS)
 	{		
 		SAMPLE_PRT("vdec bind vpss fail!!!\n");
@@ -154,6 +84,23 @@ HI_S32 HiDec_VoStartAllChn(HI_S32 enMode)
         return HI_FAILURE;
 	}
     return HI_SUCCESS; 
+}
+/**********************
+ * 启动VO, 设置回放的分屏画面
+ ********************/ 
+HI_S32 HiDec_Playback_VoStartChn(HI_S32 enMode)
+{
+    HI_S32 s32Ret;
+	VO_LAYER VoLayer = 0;
+	s32Ret = SAMPLE_Playback_VO_StartChn(VoLayer, enMode);
+	if(s32Ret != HI_SUCCESS)
+	{		
+		SAMPLE_PRT("vdec bind vpss fail!!!\n");
+	    SAMPLE_COMM_VO_StopChn(VoLayer, enMode);	
+        return HI_FAILURE;
+	}
+    return HI_SUCCESS; 
+    
 }
 
 /**********************
@@ -507,14 +454,81 @@ int HiDec_ReleseDecResource(int WinPos)
 	}	
 
     return HI_SUCCESS;
+}
+/*******************
+ * 初始化SYS和VB
+ * *****************/
+HI_S32 HiDec_InitSysAndVB(SIZE_S stSize)
+{
+    HI_S32 s32Ret;
+    VB_CONF_S stVbConf;
+	SAMPLE_COMM_VDEC_Sysconf(&stVbConf, &stSize);// 配置解码视频缓存池的属性
+	s32Ret = SAMPLE_COMM_SYS_Init(&stVbConf);
+#if 0
+	if(s32Ret != HI_SUCCESS)
+	{
+	    SAMPLE_PRT("init sys fail for %#x!\n", s32Ret);
+	    SAMPLE_COMM_SYS_Exit();	
+        return HI_FAILURE;
+	} 
+    SAMPLE_COMM_SYS_MemConfig();
+#endif
+    return HI_SUCCESS;
+}
 
+/*******************
+ * 初始化mod和common VB
+ * *****************/
+HI_S32 HiDec_InitCommVB(SIZE_S stSize)
+{
+    HI_S32 s32Ret;
+    VB_CONF_S stModVbConf;
+	SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize);	
+	s32Ret = SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
+	if(s32Ret != HI_SUCCESS)
+	{	    	
+	    SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
+	    SAMPLE_COMM_SYS_Exit();	
+        return HI_FAILURE;
+	}
+    return HI_SUCCESS;
+}
 
+/*******************
+ * 初始化Vo模块
+ * *****************/
+HI_S32 HiDec_VoInit(HI_VOID)
+{
+    HI_S32 s32Ret;
+	VO_DEV VoDev = 0;
+	VO_PUB_ATTR_S stVoPubAttr;
+    HI_S32 s32ChnNum = 0;
+	VO_LAYER VoLayer = 0;
+	VO_VIDEO_LAYER_ATTR_S stVoLayerAttr;
+	SAMPLE_COMM_VDEC_VoAttr(s32ChnNum, VoDev ,&stVoPubAttr, &stVoLayerAttr);
+	s32Ret = SAMPLE_COMM_VO_StartDev(VoDev, &stVoPubAttr);
+	if(s32Ret != HI_SUCCESS)
+	{		
+		SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
+	    SAMPLE_COMM_VO_StopDev(VoDev);
+        return HI_FAILURE;
+	}
+    
+	s32Ret = SAMPLE_COMM_VO_StartLayer(VoLayer, &stVoLayerAttr);
+	if(s32Ret != HI_SUCCESS)
+	{		
+		SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
+	    SAMPLE_COMM_VO_StopLayer(VoLayer);
+        return HI_FAILURE;
+	}	
+
+    return HI_SUCCESS;
 }
 
 /********************************
  * 异常信号处理，如Ctrl+c kill等。
  *******************************/
-HI_VOID Hi_DecHandleSig(HI_S32 signo)
+HI_VOID Hi_HandleSig(HI_S32 signo)
 {
     if(SIGINT == signo || SIGTERM == signo)
     {   
@@ -522,6 +536,7 @@ HI_VOID Hi_DecHandleSig(HI_S32 signo)
     }   
     exit(0);
 }
+
 /*************************************
  * 海思解码模块的初始化
  ***************************************/
@@ -561,4 +576,3 @@ int Hi_DecMppInit(HI_VOID)
     }    
     return 	HI_SUCCESS;
 }
-

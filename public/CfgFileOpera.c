@@ -140,10 +140,11 @@ pthread_mutex_t WriteCfgMutex = PTHREAD_MUTEX_INITIALIZER;
 void SetProfileString(char *profile, char *KeyName, char *OldKeyVal, char *NewKeyVal)
 {
     char buf[128];
-    printf("======OOOOOO:%s, =======NNNNNNN:%s\n",OldKeyVal, NewKeyVal);
+    // printf("======OOOOOO:%s, =======NNNNNNN:%s\n",OldKeyVal, NewKeyVal);
     sprintf(buf,"sed -i 's/%s = %s/%s = %s/' %s", KeyName, OldKeyVal, KeyName, NewKeyVal, profile);
     printf("buf:%s\n",buf);
     pthread_mutex_lock(&WriteCfgMutex);    
     system(buf);
     pthread_mutex_unlock(&WriteCfgMutex);
 }
+

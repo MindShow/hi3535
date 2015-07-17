@@ -7,7 +7,8 @@ SUBDIRS += HiSDK/common
 SUBDIRS += HiApp
 SUBDIRS += public 
 SUBDIRS += shm
-SUBDIRS += alarm
+SUBDIRS += database 
+
 #-C:切换编译的目录 
 #但下面的语句，首先会执行$(SUBDIRS):，即切换到子目录(SUBDIRS)appLib中，执行里面的Makefile,然后再切换返回
 #当前目录，再切换到demo目录中执行其中的makefile。

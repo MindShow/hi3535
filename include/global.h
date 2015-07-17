@@ -20,6 +20,10 @@ typedef long long      DWORD64;
 #define CUR_DISPLAY_25MUX    25
 
 #define STREAM_HEADER_LEN    12
+
+#define PLAY_MODE_PREVIEW    0xFA
+#define PLAY_MODE_PLAYBACK   0xFB
+
 typedef struct tagCmd
 {
     short cmdCode;//命令字

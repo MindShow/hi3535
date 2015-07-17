@@ -19,6 +19,7 @@ extern "C"{
 #define SHM_ID_HIFB_VIDEO	3
 #define SHM_ID_HIFB_FB	    4
 #define SHM_ID_HIFB_CMD	    4
+#define SHM_ID_AI           5
 #define SHM_ID_SERVER1	    101
 #define SHM_ID_HIFB1_VIDEO	103
 #define SHM_ID_HIFB1_FB	    104
