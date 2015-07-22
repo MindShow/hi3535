@@ -11,7 +11,7 @@ extern "C" {
 #include "HiFrameBuf.h"
 #include "ShareMem.h"
 #include "HiShm.h"
-#include "HiMotionDetect.h"
+#include "HiVDA.h"
 #include "watchdog.h"
 #include "database.h"
 

@@ -10,7 +10,7 @@ extern "C" {
 #include "CfgFileOpera.h"
 
 typedef void *(*sthread)(void*);
-void PrintByte(void*p,int len);
+void byte_print(void*p,int len);
 
 int GetCfgDispNum(void);
 int SetCfgDispNum(int DispNum);

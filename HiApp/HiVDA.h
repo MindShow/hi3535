@@ -13,8 +13,7 @@ extern "C" {
 #include "common.h"
 #include "ShareMem.h"
 
-#define PIC_RESULT_LEN 1024*1024*2
-
+#define SIZE_BUF_SEND2HIAI (1024*10)
 typedef struct hiVDA_MD_PARAM_S
 {
     HI_BOOL bThreadStart;

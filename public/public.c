@@ -23,7 +23,7 @@ int CreatThread(sthread func,void* param)
 /**********************************************
  * 打印16进制 
  ************************************************/
-void PrintByte(void*p,int len)
+void byte_print(void*p,int len)
 {
     int i=1;
     while(i<len+1)

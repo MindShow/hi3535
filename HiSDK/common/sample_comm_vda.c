@@ -174,7 +174,7 @@ HI_VOID *SAMPLE_COMM_VDA_MdGetResult(HI_VOID *pdata)
     {
         maxfd = VdaFd;
     }
-    system("clear");
+    // system("clear");
     while (HI_TRUE == pgs_stMdParam->bThreadStart)
     {
         FD_ZERO(&read_fds);

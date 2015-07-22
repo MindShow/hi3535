@@ -1,4 +1,4 @@
-#include "HiMotionDetect.h"
+#include "HiVDA.h"
 
 static pthread_t g_VdaPid;
 static pthread_t g_mdpid;
@@ -25,7 +25,7 @@ int mySAMPLE_COMM_VDA_MdPrtObj(char *pData,HI_U32 len, VDA_DATA_S *pstVdaData)
 	if (len < 12+pstVdaData->unData.stMdData.stObjData.u32ObjNum*2*4) return -2;
 	len = 12+pstVdaData->unData.stMdData.stObjData.u32ObjNum*2*4;
 	
-//    fprintf(fp, "ObjNum=%d, IndexOfMaxObj=%d, SizeOfMaxObj=%d, SizeOfTotalObj=%d\n", 
+//    fprintf(stdout, "ObjNum=%d, IndexOfMaxObj=%d, SizeOfMaxObj=%d, SizeOfTotalObj=%d\n", 
 //                   pstVdaData->unData.stMdData.stObjData.u32ObjNum, 
 //		     pstVdaData->unData.stMdData.stObjData.u32IndexOfMaxObj, 
 //		     pstVdaData->unData.stMdData.stObjData.u32SizeOfMaxObj,
@@ -41,7 +41,7 @@ int mySAMPLE_COMM_VDA_MdPrtObj(char *pData,HI_U32 len, VDA_DATA_S *pstVdaData)
     for (i=0; i<pstVdaData->unData.stMdData.stObjData.u32ObjNum; i++)
     {
         pstVdaObj = pstVdaData->unData.stMdData.stObjData.pstAddr + i;
-//        fprintf(fp, "[%d]\t left=%d, top=%d, right=%d, bottom=%d\n", i, 
+//        fprintf(stdout, "[%d]\t left=%d, top=%d, right=%d, bottom=%d\n", i, 
 //			  pstVdaObj->u16Left, pstVdaObj->u16Top, 
 //			  pstVdaObj->u16Right, pstVdaObj->u16Bottom);
 		*(HI_U16 *)(pData+nIndex) = pstVdaObj->u16Left;
@@ -84,9 +84,10 @@ int mySAMPLE_COMM_VDA_MdPrtSad(char *pData,HI_U32 len,VDA_DATA_S *pstVdaData)
 	HI_U32  u32MbWidth = pstVdaData->u32MbWidth;
 	
 	if (len < 8+u32MbHeight*u32MbWidth*2) return -2;
-	len = 8+u32MbHeight*u32MbWidth*2;
+	//len = 8+u32MbHeight*u32MbWidth*2;
 	
-	int nIndex = 8;
+	system("clear");
+	int nIndex = 0;
     for(i=0; i<pstVdaData->u32MbHeight; i++)
     {
 		pAddr = (HI_VOID *)((HI_U32)pstVdaData->unData.stMdData.stMbSadData.pAddr
@@ -97,37 +98,52 @@ int mySAMPLE_COMM_VDA_MdPrtSad(char *pData,HI_U32 len,VDA_DATA_S *pstVdaData)
 	        HI_U8  *pu8Addr;
 	        HI_U16 *pu16Addr;
 		
+			*(HI_U16 *)(pData+nIndex) = pstVdaData->unData.stMdData.stMbSadData.enMbSadBits;
+			nIndex += 2;
 	        if(VDA_MB_SAD_8BIT == pstVdaData->unData.stMdData.stMbSadData.enMbSadBits)
 	        {
 	            pu8Addr = (HI_U8 *)pAddr + j;
-	            //fprintf(fp, "%-2d ",*pu8Addr);
-				*(HI_U16 *)(pData+nIndex) = *pu8Addr;
-				nIndex += 2;
+	            fprintf(stdout, "%-2d ",*pu8Addr);
+				*(HI_U8 *)(pData+nIndex) = *pu8Addr;
+				nIndex += 1;
 	        }
 	        else
 	        {
 	            pu16Addr = (HI_U16 *)pAddr + j;
-				//fprintf(fp, "%-4d ",*pu16Addr);
+				fprintf(stdout, "%-4d ",*pu16Addr);
 				*(HI_U16 *)(pData+nIndex) = *pu16Addr;
 				nIndex += 2;
 	        }
 		}
+		printf("\n");
     }
-	
+	len = nIndex;
+	printf("len=%d\n",len);
     return len;
 }
 
 void mySend2HIAI(VDA_DATA_S *pstVdaData)
 {
-    static const int len = PIC_RESULT_LEN;
-	char sBuf[PIC_RESULT_LEN]={0};
-	int nIndex = 0;
+    char sBuf[16] = {0};
+    *(unsigned short*)(sBuf+0) = 0x0002;
+    #if 0
+	static const int len = SIZE_BUF_SEND2HIAI;
+	char sBuf[SIZE_BUF_SEND2HIAI]={0};
+	int nIndex = 12;
 	int nRes = 0;
-	
+
+	*(HI_U32*)(sBuf+nIndex) = pstVdaData->u32MbWidth;
+	nIndex += 4;
+	*(HI_U32*)(sBuf+nIndex) = pstVdaData->u32MbHeight;
+	nIndex += 4;	
+	*(HI_U64*)(sBuf+nIndex) = pstVdaData->u64Pts;
+	nIndex += 8;
+	//int start = nIndex;
 	nRes = mySAMPLE_COMM_VDA_MdPrtSad(sBuf+nIndex+4,len-nIndex-4,pstVdaData);
 	if (nRes<0)
 	{
 		*(int*)(sBuf+nIndex) = 0;
+		nIndex += 4;
 	}
 	else
 	{
@@ -135,11 +151,14 @@ void mySend2HIAI(VDA_DATA_S *pstVdaData)
 		nIndex += 4;
 		nIndex += nRes;
 	}
-
+	//int end = nIndex;
+	//printf("start=%d,end=%d\n",start,end);
+	//byte_print(sBuf+start,end);
 	nRes = mySAMPLE_COMM_VDA_MdPrtObj(sBuf+nIndex+4,len-nIndex-4,pstVdaData);
 	if (nRes<0)
 	{
 		*(int*)(sBuf+nIndex) = 0;
+		nIndex += 4;
 	}
 	else
 	{
@@ -152,6 +171,7 @@ void mySend2HIAI(VDA_DATA_S *pstVdaData)
 	if (nRes<0)
 	{
 		*(int*)(sBuf+nIndex) = 0;
+		nIndex += 4;
 	}
 	else
 	{
@@ -160,9 +180,16 @@ void mySend2HIAI(VDA_DATA_S *pstVdaData)
 		nIndex += nRes;
 	}
 	
-	shm_send(SHM_ID_AI,sBuf,nIndex); 
-    
+	*(unsigned short*)(sBuf) = 0x0202;
+	*(unsigned short*)(sBuf+2) = 0;
+	*(unsigned short*)(sBuf+4) = 0;
+	*(unsigned short*)(sBuf+6) = 0;
+	*(unsigned int*)(sBuf+8)   = nIndex-12;
+	
+	shm_send(5,sBuf,nIndex); 
+#endif
 }
+
 /****************************
  *创建MD通道
  *****************************/
@@ -308,7 +335,7 @@ HI_VOID *HiMD_GetResultThread(HI_VOID *pdata)
     VDA_DATA_S stVdaData;
     VDA_MD_PARAM_S *pgs_stMdParam;
     HI_S32 maxfd = 0;
-    FILE *fp = stdout;
+    // FILE *fp = stdout;
     HI_S32 VdaFd;
     fd_set read_fds;
     struct timeval TimeoutVal;
@@ -316,7 +343,7 @@ HI_VOID *HiMD_GetResultThread(HI_VOID *pdata)
     pgs_stMdParam = (VDA_MD_PARAM_S *)pdata;
 
     VdaChn   = pgs_stMdParam->VdaChn;
-    SAMPLE_PRT("VdaChn:%d\n", VdaChn);
+    // SAMPLE_PRT("VdaChn:%d\n", VdaChn);
 
     /* decide the stream file name, and open file to save stream */
     /* Set Venc Fd. */
@@ -332,7 +359,7 @@ HI_VOID *HiMD_GetResultThread(HI_VOID *pdata)
     {
         maxfd = VdaFd;
     }
-    system("clear");
+    // system("clear");
     while (HI_TRUE == pgs_stMdParam->bThreadStart)
     {
         FD_ZERO(&read_fds);
@@ -367,8 +394,9 @@ HI_VOID *HiMD_GetResultThread(HI_VOID *pdata)
                 /*******************************************************
                    *step 2.4 : save frame to file
                 *******************************************************/
-                printf("\033[0;0H");/*move cursor*/
-		        SAMPLE_COMM_VDA_MdPrtSad(fp, &stVdaData);
+                 // printf("\033[0;0H");/*move cursor, 设置光标的位置在0行0列，也就是左上角*/
+		         // SAMPLE_COMM_VDA_MdPrtSad(fp, &stVdaData);
+                mySend2HIAI(&stVdaData);
                 /*******************************************************
                    *step 2.5 : release stream
                    *******************************************************/

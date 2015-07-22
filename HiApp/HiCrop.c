@@ -8,7 +8,7 @@ HI_S32 hi_vpss_StartClip(VPSS_GRP VpssClipGrp, VPSS_CROP_INFO_S *pstCropInfo, HI
 	if(StartClip == HI_TRUE)
 	{
 		stCropInfo.bEnable = HI_TRUE;
-		stCropInfo.enCropCoordinate = VPSS_CROP_ABS_COOR;
+		stCropInfo.enCropCoordinate = VPSS_CROP_ABS_COOR;// 绝对坐标
 		stCropInfo.stCropRect.s32X = pstCropInfo->stCropRect.s32X;
 		stCropInfo.stCropRect.s32Y = pstCropInfo->stCropRect.s32Y;
 		stCropInfo.stCropRect.u32Width = pstCropInfo->stCropRect.u32Width;
@@ -175,6 +175,7 @@ HI_S32  ZoomInThread(int ZoomInEn, sdk_zoom_t *pZoom)
 	if(ZoomInEn != 1)
 	{
 		/*get vo Attr*/
+        // 获取输出通道的属性，这里主要是获取通道的宽高信息
 		s32Ret = HI_MPI_VO_GetChnAttr(VoLayer, VoChn, &stChnAttr);
 		if (s32Ret != HI_SUCCESS)
 		{
@@ -183,6 +184,7 @@ HI_S32  ZoomInThread(int ZoomInEn, sdk_zoom_t *pZoom)
 		}
 
 		/*get vpss Attr*/
+        // 从vpssGrp获取原始图像的信息
 		s32Ret = HI_MPI_VPSS_GetGrpFrame(VpssGrp, &stFrameInfo, 0);
 		if (s32Ret != HI_SUCCESS)
 		{
@@ -191,6 +193,7 @@ HI_S32  ZoomInThread(int ZoomInEn, sdk_zoom_t *pZoom)
 		}
 		stPicSize.u32Width = stFrameInfo.stVFrame.u32Width;
 		stPicSize.u32Height = stFrameInfo.stVFrame.u32Height;
+        // 释放一张源图像信息
 		s32Ret = HI_MPI_VPSS_ReleaseGrpFrame(VpssGrp, &stFrameInfo);
 		if (s32Ret != HI_SUCCESS)
 		{
@@ -218,7 +221,7 @@ HI_S32  ZoomInThread(int ZoomInEn, sdk_zoom_t *pZoom)
 		hi_vpss_StartClip(VpssGrp, &stCropInfo, HI_FALSE);
 	}
 	/*Move ZoomIn*/
-	if(ZoomInEn == 2)
+	if(ZoomInEn == 2)// 拖动截图区域
 	{
 		stMoveInfo.stCropRect.s32X = pZoom->x;
 		stMoveInfo.stCropRect.s32Y = pZoom->y;

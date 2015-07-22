@@ -1,5 +1,18 @@
 #include "HiMppDec.h"
 
+int HiDec_Rotate(int chn, int Rotate)
+{
+    HI_S32 s32Ret;
+    ROTATE_E enRotate;
+    enRotate =Rotate;
+    s32Ret = HI_MPI_VDEC_SetRotate(chn, enRotate);
+    if (HI_SUCCESS !=s32Ret)
+    {    
+        printf("Rotate failed! with chn = %d s32Ret = %d\n", chn, s32Ret);
+        return HI_FAILURE;
+    }    
+    return HI_SUCCESS;
+}
 
 /*******************
  * 获取分辨率及其尺寸
@@ -168,6 +181,7 @@ HI_S32 HiDec_QueryChnInfo(int Chn, VDEC_CHN_STAT_S *stChnStat)
 {
     return (HI_MPI_VDEC_Query(Chn, stChnStat));
 }
+
 /******************
  *使能通道
  * ***************/

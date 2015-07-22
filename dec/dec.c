@@ -214,7 +214,7 @@ int Hi_PlaybackDecStart(int DispMode)
  ********************************/
 int Hi_DecStart(int DispMode, int PlayMode)
 {
-    if(PlayMode == PLAY_MODE_PREVIEW)
+    if(PlayMode == PLAY_MODE_PLAYBACK)
     {
        Hi_PlaybackDecStart(DispMode);   
     }
